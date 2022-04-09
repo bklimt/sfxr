@@ -25,6 +25,7 @@
 
 #include <stdio.h>
 #include <string.h>
+#include <unistd.h>
 
 void error (const char *file, unsigned int line, const char *msg)
 {

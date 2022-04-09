@@ -546,7 +546,7 @@ static void SDLAudioCallback(void *userdata, Uint8 *stream, int len)
 	{
 		unsigned int l = len/2;
 		float* fbuf = new float[l];
-		memset(fbuf, 0, sizeof(fbuf));
+		memset(fbuf, 0, l * sizeof(float));
 		SynthSample(l, fbuf, NULL);
 		while (l--)
 		{
