@@ -42,6 +42,7 @@ float frnd(float range)
 	return (float)rnd(10000)/10000*range;
 }
 
+extern int scale;
 
 Spriteset font;
 Spriteset ld48;
@@ -1321,7 +1322,7 @@ void ddkInit()
 {
 	srand(time(NULL));
 
-	ddkSetMode(640,480, 32, 60, DDK_WINDOW, "sfxr"); // requests window size etc from ddrawkit
+	ddkSetMode(640*scale, 480*scale, 32, 60, DDK_WINDOW, "sfxr"); // requests window size etc from ddrawkit
 
 	if (LoadTGA(font, "/usr/local/share/sfxr/images/font.tga")) {
         	/* Try again in cwd */

@@ -23,6 +23,8 @@
 #include "sdlkit.h"
 #include "tools.h"
 
+int scale = 3;
+
 int LoadTGA(Spriteset& tiles, const char *filename)
 {
 	FILE *file;
@@ -69,10 +71,10 @@ int LoadTGA(Spriteset& tiles, const char *filename)
 
 void ClearScreen(DWORD color)
 {
-	for(int y=0;y<480;y++)
+	for(int y=0;y<(480*scale);y++)
 	{
 		int offset=y*ddkpitch;
-		for(int x=0;x<640;x+=8)
+		for(int x=0;x<(640*scale);x+=8)
 		{
 			ddkscreen32[offset++]=color;
 			ddkscreen32[offset++]=color;
@@ -88,6 +90,10 @@ void ClearScreen(DWORD color)
 
 void DrawBar(int sx, int sy, int w, int h, DWORD color)
 {
+	sx *= scale;
+	sy *= scale;
+	w *= scale;
+	h *= scale;
 	for(int y=sy;y<sy+h;y++)
 	{
 		int offset=y*ddkpitch+sx;
@@ -119,24 +125,35 @@ void DrawBox(int sx, int sy, int w, int h, DWORD color)
 
 void DrawSprite(Spriteset& sprites, int sx, int sy, int i, DWORD color)
 {
+	int fscale = scale;
+	sx *= scale;
+	sy *= scale;
 	for(int y=0;y<sprites.height;y++)
 	{
-		int offset=(sy+y)*ddkpitch+sx;
-		int spoffset=y*sprites.pitch+i*sprites.width;
-		if(color&0xFF000000)
-			for(int x=0;x<sprites.width;x++)
-			{
-				DWORD p=sprites.data[spoffset++];
-				if(p!=0x300030)
-					ddkscreen32[offset+x]=p;
+		for (int row = 0; row < fscale; row++) {
+			int offset=(sy+(y*fscale)+row)*ddkpitch+sx;
+			int spoffset=y*sprites.pitch+i*sprites.width;
+			if(color&0xFF000000) {
+				for(int x=0;x<sprites.width;x++)
+				{
+					DWORD p=sprites.data[spoffset++];
+					if(p!=0x300030) {
+						for (int col = 0; col < fscale; col++) {
+							ddkscreen32[offset+(x*fscale)+col]=p;
+						}
+					}
+				}
+			} else {
+				for(int x=0;x<sprites.width;x++)
+				{
+					DWORD p=sprites.data[spoffset++];
+					if(p!=0x300030)
+						for (int col = 0; col < fscale; col++) {
+							ddkscreen32[offset+(x*fscale)+col]=color;
+						}
+				}
 			}
-		else
-			for(int x=0;x<sprites.width;x++)
-			{
-				DWORD p=sprites.data[spoffset++];
-				if(p!=0x300030)
-					ddkscreen32[offset+x]=color;
-			}
+		}
 	}
 }
 
@@ -156,6 +173,10 @@ void DrawText(Spriteset& font, int sx, int sy, DWORD color, const char *string, 
 
 bool MouseInBox(int x, int y, int w, int h)
 {
+	x *= scale;
+	y *= scale;
+	w *= scale;
+	h *= scale;
 	if(mouse_x>=x && mouse_x<x+w && mouse_y>=y && mouse_y<y+h)
 		return true;
 	return false;
