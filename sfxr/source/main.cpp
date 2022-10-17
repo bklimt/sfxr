@@ -30,6 +30,7 @@
 #include <ctime>
 #include <cmath>
 #include <string>
+#include <iostream>
 
 #include "SDL.h"
 
@@ -640,10 +641,12 @@ bool Slider(int x, int y, float& value, bool bipolar, const char* text)
 				vselected=&value;
 			else
 			{
-				if(bipolar)
-					value = (mouse_x - x)/50.0f - 1.0f;
-				else
-					value = (mouse_x - x)/100.0f;
+				std::cout << "Clicked at " << mouse_x << ", " << mouse_y << std::endl;
+				if(bipolar) {
+					value = (mouse_x - (x*scale))/(50.0f * scale) - 1.0f;
+				} else {
+					value = (mouse_x - (x*scale))/(100.0f * scale);
+				}
 				result = true;
 			}
 		}

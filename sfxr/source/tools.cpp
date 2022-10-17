@@ -23,7 +23,7 @@
 #include "sdlkit.h"
 #include "tools.h"
 
-int scale = 3;
+int scale = 2;
 
 int LoadTGA(Spriteset& tiles, const char *filename)
 {
