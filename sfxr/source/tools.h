@@ -23,18 +23,19 @@
 #ifndef _TOOLS_H__
 #define _TOOLS_H__
 
-typedef Uint32 DWORD;
-typedef Uint16 WORD;
+#include <cstdint>
 
-struct Spriteset
-{
-	DWORD *data;
-	int width;
-	int height;
-	int pitch;
+typedef uint32_t DWORD;
+typedef uint16_t WORD;
+
+struct Spriteset {
+  DWORD* data;
+  int width;
+  int height;
+  int pitch;
 };
 
-int LoadTGA(Spriteset& tiles, const char *filename);
+int LoadTGA(Spriteset& tiles, const char* filename);
 
 void ClearScreen(DWORD color);
 
@@ -44,9 +45,9 @@ void DrawBox(int sx, int sy, int w, int h, DWORD color);
 
 void DrawSprite(Spriteset& sprites, int sx, int sy, int i, DWORD color);
 
-void DrawText(Spriteset& font, int sx, int sy, DWORD color, const char *string, ...);
+void DrawText(Spriteset& font, int sx, int sy, DWORD color, const char* string,
+              ...);
 
 bool MouseInBox(int x, int y, int w, int h);
 
 #endif
-

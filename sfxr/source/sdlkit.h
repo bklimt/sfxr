@@ -23,12 +23,17 @@
 #ifndef SDLKIT_H
 #define SDLKIT_H
 
-#include "SDL.h"
 #include <string>
 
+#include "SDL.h"
+
+constexpr int UI_SCALE = 3;
 
 #define ERROR(x) error(__FILE__, __LINE__, #x)
-#define VERIFY(x) do { if (!(x)) ERROR(x); } while (0)
+#define VERIFY(x)       \
+  do {                  \
+    if (!(x)) ERROR(x); \
+  } while (0)
 
 typedef Uint32 DWORD;
 typedef Uint16 WORD;
@@ -38,55 +43,51 @@ typedef Uint16 WORD;
 #define DIK_Z SDLK_z
 #define DDK_WINDOW 0
 
-
 extern Uint32 *ddkscreen32;
 extern Uint16 *ddkscreen16;
 extern int ddkpitch;
-
 
 extern int mouse_x, mouse_y, mouse_px, mouse_py;
 extern bool mouse_left, mouse_right, mouse_middle;
 extern bool mouse_leftclick, mouse_rightclick, mouse_middleclick;
 
+void error(const char *file, unsigned int line, const char *msg);
 
-void error (const char *file, unsigned int line, const char *msg);
-
-void ddkInit();      // Will be called on startup
-bool ddkCalcFrame(); // Will be called every frame, return true to continue running or false to quit
-void ddkFree();      // Will be called on shutdown
+void ddkInit();       // Will be called on startup
+bool ddkCalcFrame();  // Will be called every frame, return true to continue
+                      // running or false to quit
+void ddkFree();       // Will be called on shutdown
 
 class DPInput {
-public:
-	DPInput() {}
-	~DPInput() {}
-	static void Update () {}
+ public:
+  DPInput() {}
+  ~DPInput() {}
+  static void Update() {}
 
-	static bool KeyPressed(SDLKey key);
-
+  static bool KeyPressed(SDLKey key);
 };
 
-void sdlupdate ();
+void sdlupdate();
 
-bool ddkLock ();
+bool ddkLock();
 
-void ddkUnlock ();
+void ddkUnlock();
 
-void ddkSetMode (int width, int height, int bpp, int refreshrate, int fullscreen, const char *title);
+void ddkSetMode(int width, int height, int bpp, int refreshrate, int fullscreen,
+                const char *title);
 
+// void selected_file (GtkWidget *button, GtkFileSelection *fs);
 
-//void selected_file (GtkWidget *button, GtkFileSelection *fs);
+bool select_file(char *buf, bool showNewButton);
+std::string new_file(const std::string &forced_extension);
 
-bool select_file (char *buf, bool showNewButton);
-std::string new_file(const std::string& forced_extension);
+#define FileSelectorLoad(file, y) select_file(file, false)
+#define FileSelectorSave(file, y) select_file(file, true)
 
-#define FileSelectorLoad(file,y) select_file(file, false)
-#define FileSelectorSave(file,y) select_file(file, true)
+void sdlquit();
 
-void sdlquit ();
+void sdlinit();
 
-void sdlinit ();
-
-void loop ();
-
+void loop();
 
 #endif
