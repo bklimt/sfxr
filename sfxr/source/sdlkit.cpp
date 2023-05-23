@@ -104,7 +104,6 @@ void updateMouse(const SDL_MouseButtonEvent& event) {
 }
 
 void sdlupdate() {
-  /*
   mouse_px = mouse_x;
   mouse_py = mouse_y;
   Uint8 buttons = SDL_GetMouseState(&mouse_x, &mouse_y);
@@ -124,6 +123,7 @@ void sdlupdate() {
   mouse_leftclick = mouse_left && !mouse_left_p;
   mouse_rightclick = mouse_right && !mouse_right_p;
   mouse_middleclick = mouse_middle && !mouse_middle_p;
+  /*
   if (mouse_leftclick) {
     std::cout << "left click!" << std::endl;
   }
@@ -528,6 +528,7 @@ void loop(void) {
 
       case SDL_KEYDOWN:
         keys[e.key.keysym.sym] = true;
+        break;
 
       case SDL_MOUSEBUTTONDOWN:
         // std::cout << "mouse button down" << std::endl;
@@ -542,7 +543,7 @@ void loop(void) {
       default:
         break;
     }
-    sdlupdate();
+    // sdlupdate();
     if (!ddkCalcFrame()) return;
     // SDL_Flip(sdlscreen);
     flip();
