@@ -58,6 +58,13 @@ void sdlupdate() {
   mouse_px = mouse_x;
   mouse_py = mouse_y;
   Uint8 buttons = SDL_GetMouseState(&mouse_x, &mouse_y);
+  if (renderer != nullptr) {
+    float fmouse_x;
+    float fmouse_y;
+    SDL_RenderWindowToLogical(renderer, mouse_x, mouse_y, &fmouse_x, &fmouse_y);
+    mouse_x = fmouse_x;
+    mouse_y = fmouse_y;
+  }
   bool mouse_left_p = mouse_left;
   bool mouse_right_p = mouse_right;
   bool mouse_middle_p = mouse_middle;
@@ -109,6 +116,10 @@ void flip() {
   if (SDL_UpdateTexture(texture, nullptr, sdlscreen->pixels,
                         sdlscreen->pitch) != 0) {
     std::cerr << "Unable to update particle texture" << std::endl;
+  }
+  SDL_SetRenderDrawColor(renderer, 0, 0, 0, 0x33);
+  if (SDL_RenderClear(renderer) != 0) {
+    std::cerr << "Unable to clear: " << SDL_GetError() << std::endl;
   }
   if (SDL_RenderCopy(renderer, texture, nullptr, nullptr) != 0) {
     std::cerr << "Unable to copy particle texture: " << SDL_GetError()
