@@ -59,6 +59,7 @@ void updateMouse(const SDL_MouseButtonEvent& event) {
   mouse_py = mouse_y;
   mouse_x = event.x;
   mouse_y = event.y;
+  /*
   if (renderer != nullptr) {
     float fmouse_x;
     float fmouse_y;
@@ -66,6 +67,7 @@ void updateMouse(const SDL_MouseButtonEvent& event) {
     mouse_x = fmouse_x;
     mouse_y = fmouse_y;
   }
+  */
   bool mouse_left_p = mouse_left;
   bool mouse_right_p = mouse_right;
   bool mouse_middle_p = mouse_middle;

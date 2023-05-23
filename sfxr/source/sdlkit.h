@@ -27,7 +27,7 @@
 
 #include "SDL.h"
 
-constexpr int UI_SCALE = 3;
+constexpr int UI_SCALE = 1;
 
 #define ERROR(x) error(__FILE__, __LINE__, #x)
 #define VERIFY(x)       \
