@@ -54,7 +54,43 @@ bool mouse_leftclick = false, mouse_rightclick = false,
 
 SDL_Surface* sdlscreen = NULL;
 
+void updateMouse(const SDL_MouseButtonEvent& event) {
+  mouse_px = mouse_x;
+  mouse_py = mouse_y;
+  mouse_x = event.x;
+  mouse_y = event.y;
+  if (renderer != nullptr) {
+    float fmouse_x;
+    float fmouse_y;
+    SDL_RenderWindowToLogical(renderer, mouse_x, mouse_y, &fmouse_x, &fmouse_y);
+    mouse_x = fmouse_x;
+    mouse_y = fmouse_y;
+  }
+  bool mouse_left_p = mouse_left;
+  bool mouse_right_p = mouse_right;
+  bool mouse_middle_p = mouse_middle;
+  mouse_left = event.button == SDL_BUTTON_LEFT && event.state == SDL_PRESSED;
+  mouse_right = event.button == SDL_BUTTON_RIGHT && event.state == SDL_PRESSED;
+  mouse_middle =
+      event.button == SDL_BUTTON_MIDDLE && event.state == SDL_PRESSED;
+  mouse_leftclick = mouse_left && !mouse_left_p;
+  mouse_rightclick = mouse_right && !mouse_right_p;
+  mouse_middleclick = mouse_middle && !mouse_middle_p;
+  /*
+  if (mouse_leftclick) {
+    std::cout << "left click!" << std::endl;
+  }
+  if (mouse_rightclick) {
+    std::cout << "right click!" << std::endl;
+  }
+  if (mouse_middleclick) {
+    std::cout << "middle click!" << std::endl;
+  }
+  */
+}
+
 void sdlupdate() {
+  /*
   mouse_px = mouse_x;
   mouse_py = mouse_y;
   Uint8 buttons = SDL_GetMouseState(&mouse_x, &mouse_y);
@@ -74,6 +110,16 @@ void sdlupdate() {
   mouse_leftclick = mouse_left && !mouse_left_p;
   mouse_rightclick = mouse_right && !mouse_right_p;
   mouse_middleclick = mouse_middle && !mouse_middle_p;
+  if (mouse_leftclick) {
+    std::cout << "left click!" << std::endl;
+  }
+  if (mouse_rightclick) {
+    std::cout << "right click!" << std::endl;
+  }
+  if (mouse_middleclick) {
+    std::cout << "middle click!" << std::endl;
+  }
+  */
 }
 
 bool ddkLock() {
@@ -356,6 +402,7 @@ bool select_file(char* buf, bool showNewButton) {
 
       case SDL_KEYDOWN:
         keys[e.key.keysym.sym] = true;
+        break;
 
       default:
         break;
@@ -437,6 +484,16 @@ void loop(void) {
 
       case SDL_KEYDOWN:
         keys[e.key.keysym.sym] = true;
+
+      case SDL_MOUSEBUTTONDOWN:
+        // std::cout << "mouse button down" << std::endl;
+        updateMouse(e.button);
+        break;
+
+      case SDL_MOUSEBUTTONUP:
+        // std::cout << "mouse button up" << std::endl;
+        updateMouse(e.button);
+        break;
 
       default:
         break;
