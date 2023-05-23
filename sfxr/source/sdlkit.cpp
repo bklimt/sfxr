@@ -333,6 +333,11 @@ std::string new_file(const std::string& forced_extension) {
             done = true;
             break;
           }
+          if (e.key.keysym.sym == SDLK_BACKSPACE) {
+            if (result.size() > 0) {
+              result.pop_back();
+            }
+          }
 
           {
             char c = e.key.keysym.sym;
