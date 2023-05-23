@@ -26,19 +26,24 @@
 #include <string.h>
 #include <unistd.h>
 
+#include <iostream>
+
 void error(const char* file, unsigned int line, const char* msg) {
   fprintf(stderr, "[!] %s:%u  %s\n", file, line, msg);
   exit(1);
 }
 
-bool keys[SDLK_LAST];
+bool keys[SDL_NUM_SCANCODES];
 
-bool DPInput::KeyPressed(SDLKey key) {
+bool DPInput::KeyPressed(SDL_Keycode key) {
   bool r = keys[key];
   keys[key] = false;
   return r;
 }
 
+SDL_Window* window = nullptr;
+SDL_Renderer* renderer = nullptr;
+SDL_Texture* texture = nullptr;
 Uint32* ddkscreen32;
 Uint16* ddkscreen16;
 int ddkpitch;
@@ -82,9 +87,34 @@ void ddkUnlock() {
 
 void ddkSetMode(int width, int height, int bpp, int refreshrate, int fullscreen,
                 const char* title) {
-  VERIFY(sdlscreen = SDL_SetVideoMode(width, height, bpp,
-                                      fullscreen ? SDL_FULLSCREEN : 0));
-  SDL_WM_SetCaption(title, title);
+  // VERIFY(sdlscreen = SDL_SetVideoMode(width, height, bpp,
+  //                                     fullscreen ? SDL_FULLSCREEN : 0));
+  // SDL_WM_SetCaption(title, title);
+
+  uint32_t r_mask = 0x00FF0000;
+  uint32_t g_mask = 0x0000FF00;
+  uint32_t b_mask = 0x000000FF;
+  uint32_t a_mask = 0xFF000000;
+  VERIFY(sdlscreen = SDL_CreateRGBSurface(0, width, height, bpp, r_mask, g_mask,
+                                          b_mask, a_mask));
+
+  VERIFY(texture =
+             SDL_CreateTexture(renderer, SDL_PIXELFORMAT_RGB888,
+                               SDL_TEXTUREACCESS_STREAMING, width, height));
+
+  VERIFY(SDL_SetTextureBlendMode(texture, SDL_BLENDMODE_BLEND) == 0);
+}
+
+void flip() {
+  if (SDL_UpdateTexture(texture, nullptr, sdlscreen->pixels,
+                        sdlscreen->pitch) != 0) {
+    std::cerr << "Unable to update particle texture" << std::endl;
+  }
+  if (SDL_RenderCopy(renderer, texture, nullptr, nullptr) != 0) {
+    std::cerr << "Unable to copy particle texture: " << SDL_GetError()
+              << std::endl;
+  }
+  SDL_RenderPresent(renderer);
 }
 
 #include <malloc.h>
@@ -181,8 +211,8 @@ extern Spriteset font;
 
 std::string new_file(const std::string& forced_extension) {
   using namespace std;
-  SDL_EnableUNICODE(1);
-  SDL_EnableKeyRepeat(0, 0);
+  // SDL_EnableUNICODE(1);
+  // SDL_EnableKeyRepeat(0, 0);
 
   string result;
 
@@ -204,7 +234,7 @@ std::string new_file(const std::string& forced_extension) {
           }
 
           {
-            char c = e.key.keysym.unicode;
+            char c = e.key.keysym.sym;
             if (0x21 <= c && c <= 0x7E) result += c;
           }
 
@@ -221,11 +251,12 @@ std::string new_file(const std::string& forced_extension) {
 
     SDL_Delay(5);
 
-    SDL_Flip(sdlscreen);
+    // SDL_Flip(sdlscreen);
+    flip();
   }
 
-  SDL_EnableKeyRepeat(SDL_DEFAULT_REPEAT_DELAY, SDL_DEFAULT_REPEAT_INTERVAL);
-  SDL_EnableUNICODE(0);
+  // SDL_EnableKeyRepeat(SDL_DEFAULT_REPEAT_DELAY, SDL_DEFAULT_REPEAT_INTERVAL);
+  // SDL_EnableUNICODE(0);
 
   // if(result.size() == 0)
   //	throw runtime_error("New file name is empty string.");
@@ -324,25 +355,65 @@ bool select_file(char* buf, bool showNewButton) {
 
     SDL_Delay(5);
 
-    SDL_Flip(sdlscreen);
+    // SDL_Flip(sdlscreen);
+    flip();
   }
   return gotFile;
 }
 
 void sdlquit() {
   ddkFree();
+  if (sdlscreen != nullptr) {
+    SDL_FreeSurface(sdlscreen);
+  }
+  if (texture != nullptr) {
+    SDL_DestroyTexture(texture);
+  }
+  if (renderer != nullptr) {
+    SDL_DestroyRenderer(renderer);
+  }
+  if (window != nullptr) {
+    SDL_DestroyWindow(window);
+  }
   SDL_Quit();
 }
 
-void sdlinit() {
+int sdlinit() {
+  if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO) != 0) {
+    std::cerr << "Unable to init SDL: " << SDL_GetError() << std::endl;
+    return -1;
+  }
+  atexit(sdlquit);
+
+  bool fullscreen = false;
+  window = SDL_CreateWindow(
+      "sfxr", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, 640 * UI_SCALE,
+      480 * UI_SCALE,
+      SDL_WINDOW_RESIZABLE | (fullscreen ? SDL_WINDOW_FULLSCREEN_DESKTOP : 0));
+
+  if (window == nullptr) {
+    std::cerr << "Unable to create window: " << SDL_GetError() << std::endl;
+    return -1;
+  }
+
+  renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_PRESENTVSYNC);
+  if (renderer == nullptr) {
+    std::cerr << "Unable to renderer: " << SDL_GetError() << std::endl;
+    return -1;
+  }
+
+  SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "nearest");
+  SDL_RenderSetLogicalSize(renderer, 640 * UI_SCALE, 480 * UI_SCALE);
+
   SDL_Surface* icon;
-  VERIFY(!SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO));
   icon = SDL_LoadBMP("/usr/local/share/sfxr/images/sfxr.bmp");
   if (!icon) icon = SDL_LoadBMP("images/sfxr.bmp");
-  if (icon) SDL_WM_SetIcon(icon, NULL);
-  atexit(sdlquit);
+  // if (icon) SDL_WM_SetIcon(icon, NULL);
+
   memset(keys, 0, sizeof(keys));
   ddkInit();
+
+  return 0;
 }
 
 void loop(void) {
@@ -361,12 +432,16 @@ void loop(void) {
     }
     sdlupdate();
     if (!ddkCalcFrame()) return;
-    SDL_Flip(sdlscreen);
+    // SDL_Flip(sdlscreen);
+    flip();
   }
 }
 
 int main(int argc, char* argv[]) {
-  sdlinit();
+  int n = sdlinit();
+  if (n != 0) {
+    return n;
+  }
   loop();
   return 0;
 }

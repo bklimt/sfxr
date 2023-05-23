@@ -64,7 +64,7 @@ class DPInput {
   ~DPInput() {}
   static void Update() {}
 
-  static bool KeyPressed(SDLKey key);
+  static bool KeyPressed(SDL_Keycode key);
 };
 
 void sdlupdate();
@@ -86,7 +86,7 @@ std::string new_file(const std::string &forced_extension);
 
 void sdlquit();
 
-void sdlinit();
+int sdlinit();
 
 void loop();
 

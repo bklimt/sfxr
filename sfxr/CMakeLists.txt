@@ -18,12 +18,12 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 
-cmake_minimum_required (VERSION 2.6)
+cmake_minimum_required (VERSION 3.2)
 project (sfxr)
 
-find_package(SDL REQUIRED)
-include_directories(include ${SDL_INCLUDE_DIR})
-link_libraries(${SDL_LIBRARY})
+find_package(SDL2 REQUIRED)
+include_directories(include ${SDL2_INCLUDE_DIRS})
+link_libraries(${SDL2_LIBRARIES})
 
 add_definitions("-Wall --pedantic -O2")
 
