@@ -1,6 +1,11 @@
 CMakeCache.txt
+CMakeSettings.json
 CMakeFiles/
 Makefile
 cmake_install.cmake
+SDL2.dll
 sfxr/sfxr
+.vs
 .vscode
+*.swp
+*.*~

@@ -20,12 +20,13 @@
 
 cmake_minimum_required (VERSION 3.2)
 project (sfxr)
+set (CMAKE_CXX_STANDARD 17)
 
 find_package(SDL2 REQUIRED)
 include_directories(include ${SDL2_INCLUDE_DIRS})
 link_libraries(${SDL2_LIBRARIES})
 
-add_definitions("-Wall --pedantic -O2")
+add_definitions("-Wall --pedantic")
 
 set(SRC_FILES
 	source/main.cpp

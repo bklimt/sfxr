@@ -23,10 +23,22 @@
 #include "sdlkit.h"
 
 #include <stdio.h>
+#include <malloc.h>
 #include <string.h>
-#include <unistd.h>
-
+#include <sys/stat.h>
+#include <list>
+#include <string>
 #include <iostream>
+
+#ifdef WIN32
+#include <filesystem>
+#include <locale>
+#include <codecvt>
+#else
+#include <dirent.h>
+#include <unistd.h>
+#endif
+
 
 void error(const char* file, unsigned int line, const char* msg) {
   fprintf(stderr, "[!] %s:%u  %s\n", file, line, msg);
@@ -176,16 +188,46 @@ void flip() {
   SDL_RenderPresent(renderer);
 }
 
-#include <malloc.h>
-#include <string.h>
-
 bool Button(int x, int y, bool highlight, const char* text, int id);
 
-#include <dirent.h>
-#include <sys/stat.h>
+#ifdef WIN32
 
-#include <list>
-#include <string>
+std::string filename(const std::filesystem::path& path) {
+  using convert_type = std::codecvt_utf8<wchar_t>;
+  std::wstring_convert<convert_type, wchar_t> converter;
+  std::wstring ws = path.filename().native();
+  return converter.to_bytes(ws);
+}
+
+std::list<std::string> ioList(const std::string& dirname, bool directories,
+                              bool files) {
+  std::list<std::string> dirList;
+  std::list<std::string> fileList;
+
+  std::filesystem::path path(dirname);
+  for (auto entry: std::filesystem::directory_iterator(path)) {
+      if (entry.is_directory()) {
+          if (directories) {
+            dirList.push_back(filename(entry.path()));
+          }
+    } else if (files) {
+        fileList.push_back(filename(entry.path()));
+    }
+  }
+
+  dirList.sort();
+  fileList.sort();
+
+  fileList.splice(fileList.begin(), dirList);
+
+  return fileList;
+}
+
+bool ioExists(const std::string& filename) {
+  return std::filesystem::exists(std::filesystem::path(filename));
+}
+
+#else
 
 bool ioIsDir(const std::string& filename) {
   using namespace std;
@@ -205,15 +247,13 @@ std::list<std::string> ioList(const std::string& dirname, bool directories,
   dirent* entry;
 
   while ((entry = readdir(dir)) != NULL) {
-#ifdef WIN32
-    if (ioIsDir(dirname + "/" + entry->d_name))
-#else
-    if (entry->d_type == DT_DIR)
-#endif
-    {
-      if (directories) dirList.push_back(entry->d_name);
-    } else if (files)
+    if (entry->d_type == DT_DIR) {
+      if (directories) {
+        dirList.push_back(entry->d_name);
+      }
+    } else if (files) {
       fileList.push_back(entry->d_name);
+    }
   }
 
   closedir(dir);
@@ -225,6 +265,12 @@ std::list<std::string> ioList(const std::string& dirname, bool directories,
 
   return fileList;
 }
+
+bool ioExists(const std::string& filename) {
+  return (access(filename.c_str(), 0) == 0);
+}
+
+#endif
 
 extern DPInput* input;
 
@@ -246,10 +292,6 @@ std::string stoupper(const std::string& s) {
     ++i;
   }
   return result;
-}
-
-bool ioExists(const std::string& filename) {
-  return (access(filename.c_str(), 0) == 0);
 }
 
 bool ioNew(const std::string& filename, bool readable, bool writeable) {
