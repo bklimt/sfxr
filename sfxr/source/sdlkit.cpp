@@ -22,23 +22,23 @@
 
 #include "sdlkit.h"
 
-#include <stdio.h>
 #include <malloc.h>
+#include <stdio.h>
 #include <string.h>
 #include <sys/stat.h>
+
+#include <iostream>
 #include <list>
 #include <string>
-#include <iostream>
 
 #ifdef WIN32
+#include <codecvt>
 #include <filesystem>
 #include <locale>
-#include <codecvt>
 #else
 #include <dirent.h>
 #include <unistd.h>
 #endif
-
 
 void error(const char* file, unsigned int line, const char* msg) {
   fprintf(stderr, "[!] %s:%u  %s\n", file, line, msg);
@@ -205,13 +205,13 @@ std::list<std::string> ioList(const std::string& dirname, bool directories,
   std::list<std::string> fileList;
 
   std::filesystem::path path(dirname);
-  for (auto entry: std::filesystem::directory_iterator(path)) {
-      if (entry.is_directory()) {
-          if (directories) {
-            dirList.push_back(filename(entry.path()));
-          }
+  for (auto entry : std::filesystem::directory_iterator(path)) {
+    if (entry.is_directory()) {
+      if (directories) {
+        dirList.push_back(filename(entry.path()));
+      }
     } else if (files) {
-        fileList.push_back(filename(entry.path()));
+      fileList.push_back(filename(entry.path()));
     }
   }
 
@@ -494,8 +494,8 @@ int sdlinit() {
 
   bool fullscreen = false;
   window = SDL_CreateWindow(
-      "sfxr", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, 640 * UI_SCALE,
-      480 * UI_SCALE,
+      "sfxr", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
+      640 * UI_SCALE * 2, 480 * UI_SCALE * 2,
       SDL_WINDOW_RESIZABLE | (fullscreen ? SDL_WINDOW_FULLSCREEN_DESKTOP : 0));
 
   if (window == nullptr) {
@@ -509,7 +509,7 @@ int sdlinit() {
     return -1;
   }
 
-  //SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "nearest");
+  // SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "nearest");
   SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "linear");
   SDL_RenderSetLogicalSize(renderer, 640 * UI_SCALE, 480 * UI_SCALE);
 
