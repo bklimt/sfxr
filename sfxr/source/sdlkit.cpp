@@ -509,7 +509,8 @@ int sdlinit() {
     return -1;
   }
 
-  SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "nearest");
+  //SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "nearest");
+  SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "linear");
   SDL_RenderSetLogicalSize(renderer, 640 * UI_SCALE, 480 * UI_SCALE);
 
   SDL_Surface* icon;

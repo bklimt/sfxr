@@ -21,6 +21,8 @@
 
 */
 
+#pragma comment(linker, "/SUBSYSTEM:windows /ENTRY:mainCRTStartup")
+
 #include <cmath>
 #include <cstdarg>
 #include <cstdio>
